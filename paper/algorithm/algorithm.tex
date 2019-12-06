@@ -1,0 +1,29 @@
+The \ac{KSVD} algorithm was originally introduced in \cite{aharon_k-svd_2005} and provides a way to learn an over complete dictionary with which to sparsely represent signals with a given sparsity.
+
+\begin{listing}
+\begin{minted}[tabsize=3,escapeinside=||]{Julia}
+# Initialization
+D = random(n,K)
+J = 1
+# Sparse Coding
+Z = matching_pursuit(F, D, k)
+# Dictionary Update
+for k=1:K
+	|$E_k$| = F-(DZ-D[k]Z[k])
+	|$w_k$| = ones(length(1:N))
+	|$w_k$|[k] = 0
+	|$E_k$| = |$E_k$|[wk,:]
+	D[k], Z[k] = SVD(|$E_k$|)
+	J += 1
+\end{minted}
+\label{code:ksvd}
+\caption{K-SVD Algorithm \cite{aharon_k-svd_2005}}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[tabsize=3,escapeinside=||,mathescape=true]{Julia}
+# Input: signal F, dictionary 
+# Output: vector of coefficients Z
+\end{minted}
+\caption{Matching Pursuit Algorithm \cite{mallat_matching_1993-2}}
+\end{listing}
