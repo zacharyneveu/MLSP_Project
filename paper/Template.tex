@@ -12,6 +12,13 @@
 \usepackage{todonotes}
 \usepackage{minted}
 \usemintedstyle{solarizedlight}
+\usepackage{algorithm}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	urlcolor=blue
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -26,7 +33,7 @@
 
 % Title.
 % ------
-\title{Time-domain Piano Music Transcription using K-SVD}
+\title{Towards Time-domain Piano Music Transcription using K-SVD}
 %
 % Single address.
 % ---------------
@@ -46,6 +53,8 @@
 \begin{keywords}
 K-SVD, Factor Models, Music
 \end{keywords}
+
+code at: \href{https://github.com/zacharyneveu/MLSP\_Project}{https://github.com/zacharyneveu/MLSP\_Project}
 %
 \section{Introduction}
 \label{sec:intro}
@@ -68,10 +77,13 @@ K-SVD, Factor Models, Music
 \label{sec:algorithm}
 \input{algorithm/algorithm.tex}
 
+\section{Results}%
+\label{sec:results}
+\input{results/results.tex}
 
-
-
-
+\section{Conclusions}%
+\label{sec:conclusions}
+\input{conclusion/conclusion.tex}
 
 
 % References should be produced using the bibtex program from suitable

@@ -1,29 +1,51 @@
-The \ac{KSVD} algorithm was originally introduced in \cite{aharon_k-svd_2005} and provides a way to learn an over complete dictionary with which to sparsely represent signals with a given sparsity.
-
-\begin{listing}
+The \ac{KSVD} algorithm was originally introduced in \cite{aharon_k-svd_2005} and provides a way to learn an over complete dictionary with which to represent signals with a given sparsity. Listing 1 shows an overview of the \ac{KSVD} algorithm for signal X, dictionary D and a given maximum number of iterations. Essentially, the algorithm is an iterative process with two parts. First a sparse combination of dictionary atoms is found that best fit the signal using the \ac{OMP} algorithm seen in Listing 1 \cite{tropp_greed_2004}. Next, the dictionary D is updated one atom at a time so that the selected atom contributes as possible to the sparse representations of all data points which use it. These two steps are repeated either convergence or until a specified maximum number of iterations. \begin{listing}[h]
 \begin{minted}[tabsize=3,escapeinside=||]{Julia}
-# Initialization
-D = random(n,K)
-J = 1
-# Sparse Coding
-Z = matching_pursuit(F, D, k)
-# Dictionary Update
-for k=1:K
-	|$E_k$| = F-(DZ-D[k]Z[k])
-	|$w_k$| = ones(length(1:N))
-	|$w_k$|[k] = 0
-	|$E_k$| = |$E_k$|[wk,:]
-	D[k], Z[k] = SVD(|$E_k$|)
-	J += 1
+function KSVD(X,D,max_iter)
+	# Initialization
+	D = random(n,K)
+	for j=1:max_iter
+		# Sparse Coding
+		Z = OMP(X, D, k)
+		# Dictionary Update
+		for k=1:K
+			# create error matrix
+			|$E_k$| = X-(DZ-D[k]Z[k])
+			|$w_k$| = ones(N, 1)
+			|$w_k$|[k] = 0
+			|$E_k$| = |$E_k$|[wk,:]
+			D[k], Z[k] = SVD(|$E_k$|)
+		end
+	end
+	return D, Z
+end
 \end{minted}
-\label{code:ksvd}
+\label{lst:ksvd}
 \caption{K-SVD Algorithm \cite{aharon_k-svd_2005}}
 \end{listing}
 
-\begin{listing}
+\begin{listing}[h]
 \begin{minted}[tabsize=3,escapeinside=||,mathescape=true]{Julia}
-# Input: signal F, dictionary 
-# Output: vector of coefficients Z
+function OMP(X, D, max_nonzeros)
+	residual = X
+	active_atoms = []
+	for i=1:max_nonzeros
+		atom_corrs = D'*residual
+		atom_idx = argmax(abs.(atom_corrs))
+		push(active_atoms, atom_idx)
+		selected_atoms = D[:,active_atoms]
+		z = least_squares(selected_atoms, X)
+		residual = residual-selected_atoms*z
+	end
+	return_val = zeros(n_atoms)
+	return_val[active_atoms] = z;
+	return return_val
+end
 \end{minted}
-\caption{Matching Pursuit Algorithm \cite{mallat_matching_1993-2}}
+\label{lst:omp}
+\caption{Orthogonal Matching Pursuit Algorithm \cite{tropp_greed_2004}}
 \end{listing}
+
+\noindent
+In order to reconstruct frames after $D$ is trained, \ac{OMP} can be used without performing \ac{KSVD} after. The task of fitting $Z$ given $X$ and $D$ is NP-Hard. \ac{OMP} is an iterative greedy algorithm that gives very good approximate results. The premise behind \ac{OMP} is to select atoms that are most correlated to the parts of the input signal not yet represented by chosen atoms. First, the most correlated atom is chosen, and its weight is fit using \ac{LS}. The weighted atom is then subtracted from the residual and the process is repeated. The benefit to using this approach over the original approach to matching pursuit introduced by \cite{mallat_matching_1993-2} is that using  \ac{OMP}, the atoms are chosen to be orthogonal. This means that instead of choosing two atoms and two weights to represent an aspect of the signal, \ac{OMP} will instead choose a larger weight, freeing up an atom to be used for another purpose.
+
+
